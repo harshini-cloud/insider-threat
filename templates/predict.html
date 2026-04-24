@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <div class="card">
+        <h2>Email Anomaly Detection</h2>
+        <p style="text-align: center; margin-bottom: 20px; color: var(--text-muted);">
+            Take user inputs for email features and predict if it's an anomaly using the loaded MLP model.
+        </p>
+        {% if not model_loaded %}
+        <div class="alert alert-error">
+            Models not loaded. Make sure <strong>mlp_model.pkl</strong>, <strong>scaler.pkl</strong>, <strong>tfidf.pkl</strong> are in ../final/.
+        </div>
+        {% endif %}
+        
+        <form method="POST">
+            <div class="form-group">
+                <label for="size">Email Size (bytes)</label>
+                <input id="size" type="number" name="size" min="0" step="1" value="{{ form_data.get('size', '') }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="attachments">Number of Attachments</label>
+                <input id="attachments" type="number" name="attachments" min="0" step="1" value="{{ form_data.get('attachments', '') }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="num_recipients">Number of Recipients</label>
+                <input id="num_recipient" type="number" name="num_recipients" min="1" step="1" value="{{ form_data.get('num_recipients', '') }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="hour">Hour of Day (0-23)</label>
+                <input id="hour" type="number" name="hour" min="0" max="23" step="1" value="{{ form_data.get('hour', '') }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="day_of_week">Day of Week (0=Monday to 6=Sunday)</label>
+                <select id="day_of_week" name="day_of_week" required>
+                    <option value="">Select day</option>
+                    <option value="0" {% if form_data.get('day_of_week') == '0' %}selected{% endif %}>0 - Monday</option>
+                    <option value="1" {% if form_data.get('day_of_week') == '1' %}selected{% endif %}>1 - Tuesday</option>
+                    <option value="2" {% if form_data.get('day_of_week') == '2' %}selected{% endif %}>2 - Wednesday</option>
+                    <option value="3" {% if form_data.get('day_of_week') == '3' %}selected{% endif %}>3 - Thursday</option>
+                    <option value="4" {% if form_data.get('day_of_week') == '4' %}selected{% endif %}>4 - Friday</option>
+                    <option value="5" {% if form_data.get('day_of_week') == '5' %}selected{% endif %}>5 - Saturday</option>
+                    <option value="6" {% if form_data.get('day_of_week') == '6' %}selected{% endif %}>6 - Sunday</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="content">Email Content (optional)</label>
+                <textarea id="content" name="content" rows="3" placeholder="Enter email content for TF-IDF features">{{ form_data.get('content', '') }}</textarea>
+            </div>
+
+            <button type="submit" class="btn">Predict Anomaly</button>
+        </form>
+        
+        {% if results %}
+        <!-- Results Section -->
+        <div class="results-section" style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid var(--primary);">
+            <h3 style="color: var(--primary);">Prediction Results</h3>
+            
+            <div class="prediction-result alert {{ 'alert-success' if results.prediction == 0 else 'alert-error' }}" style="margin-bottom: 1.5rem;">
+                <h4>{{ results.threat_level }}</h4>
+                <p>Risk Score: <strong>{{ "%.1f"|format(results.risk_score) }}%</strong></p>
+                <p>Normal Probability: {{ "%.1f"|format(results.proba_normal * 100) }}% | Anomaly Probability: {{ "%.1f"|format(results.proba_anomaly * 100) }}%</p>
+            </div>
+            
+            <div class="input-summary" style="margin-top: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <h4>Input Features Used:</h4>
+                <ul>
+                    {% for feature, value in results.features.items() %}
+                    <li><strong>{{ feature }}:</strong> {{ value }}</li>
+                    {% endfor %}
+                    <li><strong>Content:</strong> {{ results.content[:100] }}{% if results.content|length > 100 %}...{% endif %}</li>
+                </ul>
+            </div>
+            
+            <div class="input-summary" style="margin-top: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <h4>Input Features Used:</h4>
+                <ul>
+                    {% for feature, value in results.features.items() %}
+                    <li><strong>{{ feature }}:</strong> {{ value }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <div style="text-align: center; margin-top: 1.5rem;">
+                <a href="#" onclick="window.location.reload();" class="btn" style="max-width: 200px;">Make New Prediction</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.results-section {
+    animation: fadeIn 0.6s ease-out;
+}
+.explanation-img {
+    max-height: 400px;
+    object-fit: contain;
+}
+@media (max-width: 768px) {
+    .results-section > div { grid-template-columns: 1fr !important; }
+}
+</style>
+{% endblock %}
+

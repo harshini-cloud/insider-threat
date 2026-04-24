@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mitigating Insider Threat Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="logo">M.I.T.D.</div>
+        <nav>
+            {% if session.get('user_id') %}
+                {% if session.get('role') == 'admin' %}
+                    <a href="{{ url_for('admin_dashboard') }}">Admin Panel</a>
+                {% else %}
+                    <a href="{{ url_for('home') }}">Home</a>
+                    <a href="{{ url_for('predict') }}">Run Prediction</a>
+                {% endif %}
+                <a href="{{ url_for('logout') }}">Logout ({{ session.name }})</a>
+            {% else %}
+                <a href="{{ url_for('index') }}">Home</a>
+                <a href="{{ url_for('login') }}">User Login</a>
+                <a href="{{ url_for('register') }}">Register</a>
+                <a href="{{ url_for('login') }}">Admin Login</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Mitigating Insider Threat Detection System.</p>
+        <p>Contact Admin: admin@mitd.org | Policy: Strict Data Confidentiality Enforced.</p>
+    </footer>
+</body>
+</html>

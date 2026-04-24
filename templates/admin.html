@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container" style="align-items: flex-start;">
+    <h2 style="color: var(--accent); margin-bottom: 20px;">Admin Dashboard</h2>
+    
+    <div class="card" style="max-width: 100%;">
+        <h3>Registered Users</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Occupation</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.occupation }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.role }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card" style="max-width: 100%; margin-top: 20px;">
+        <h3>Recent Predictions</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Risk Score</th>
+                    <th>Threat Level</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pred in predictions %}
+                <tr>
+                    <td>{{ pred.user_name }}</td>
+                    <td>{{ pred.risk_score|round(2) }}%</td>
+                    <td style="color: {% if pred.threat_level == 'CRITICAL' %}var(--danger){% elif pred.threat_level == 'MEDIUM' %}orange{% else %}var(--success){% endif %}">
+                        {{ pred.threat_level }}
+                    </td>
+                    <td>{{ pred.timestamp }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
